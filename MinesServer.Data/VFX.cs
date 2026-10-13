@@ -20,5 +20,6 @@ public enum VFX : byte
     Push, // Animates a sprite from a point in the world to the player
     Heal,
     Hurt,
-    GunShot
+    GunShot,
+    PlaceDeny
 }

@@ -1,6 +1,6 @@
 {
   "name": "darkar25.kern.data",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "displayName": "Kern Data Types",
   "description": "Shared networking protocol for Client and Server",
   "unity": "6000.2",
