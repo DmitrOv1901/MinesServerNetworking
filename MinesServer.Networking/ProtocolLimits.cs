@@ -10,26 +10,21 @@ namespace MinesServer.Networking;
 public static class ProtocolLimits
 {
     /// <summary>
-    /// Максимальный размер одного кадра (payload пакета, без префикса длины).
-    /// Кадр длиннее — отклоняется как <c>PacketDecodeException</c>.
+    /// Максимальный размер кадра. Считается вместе с 4-байтовым префиксом длины —
+    /// ровно то, что <c>TryTake</c> сравнивает с этим значением.
     /// </summary>
     public const int MaxFrameLength = 4 * 1024 * 1024; /* 4M */
 
-    /// <summary>
-    /// Стартовая ёмкость буфера кадрирования. Растёт удвоением до
-    /// <see cref="MaxFrameLength"/>, сжимается обратно при оттоке данных.
+    /// 8 КБ — типичный кадр лезет без перевыделения; логистика роста в
+    /// <c>PacketBuffer</c>.
     /// </summary>
     public const int FrameBufferInitialCapacity = 8192; /* 8K */
 
     /// <summary>
-    /// Максимальный размер payload после распаковки кадра LZ4/LZMA.
-    ///
-    /// Сжатый кадр сам по себе ограничен <see cref="MaxFrameLength"/>, поэтому
-    /// честный распакованный payload тоже обязан в него укладываться: пакет,
-    /// не помещающийся в кадр без сжатия, не может быть передан и в сжатом виде.
-    ///
-    /// Значение заявленного размера приходит с провода как <c>int32</c> и проверяется
-    /// до аллокации — см. <c>LZ4Packet.Decode</c> и <c>LzmaPacket.Decode</c>.
+    /// Равен <see cref="MaxFrameLength"/>: пакет, не влезающий в кадр без сжатия,
+    /// не передать и в сжатом виде. Проверяется до аллокации, потому что размер
+    /// приходит с провода как <c>int32</c> (см. <c>LZ4Packet.Decode</c>,
+    /// <c>LzmaPacket.Decode</c>).
     /// </summary>
     public const int MaxDecompressedLength = MaxFrameLength;
 }

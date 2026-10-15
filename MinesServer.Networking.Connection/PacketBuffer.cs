@@ -8,15 +8,11 @@ namespace MinesServer.Networking.Connection;
 public class PacketBuffer
 {
     /// <summary>
-    /// Предел кадра по умолчанию. Единый для клиента и сервера — расхождение
-    /// значений означает, что одна сторона разрывает соединение там, где другая
-    /// ещё считает кадр валидным.
+    /// Единый для клиента и сервера: расхождение означает, что одна сторона рвёт
+    /// соединение там, где другая ещё считает кадр валидным.
     /// </summary>
     public const int DefaultMaxLength = ProtocolLimits.MaxFrameLength;
 
-    /// <summary>
-    /// Стартовая ёмкость по умолчанию.
-    /// </summary>
     public const int DefaultInitialCapacity = ProtocolLimits.FrameBufferInitialCapacity;
 
     private byte[] _buffer;
@@ -38,12 +34,8 @@ public class PacketBuffer
     public void Put(byte[] data, int length) => Put(data, 0, length);
 
     /// <summary>
-    /// Кладёт <paramref name="length"/> байт из <paramref name="data"/>, начиная с
-    /// <paramref name="offset"/>.
-    ///
-    /// offset обязателен: NetCoreServer отдаёт принятые данные в реюзнутом массиве,
-    /// где полезные данные не обязаны лежать с нулевой позиции. Копирование всегда
-    /// с нуля подмешивает мусор и рассинхронизирует поток кадров.
+    /// offset обязателен: NetCoreServer отдаёт принятые данные в реюзнутом
+    /// массиве, где полезные данные не обязаны лежать с нуля.
     /// </summary>
     public void Put(byte[] data, int offset, int length)
     {
@@ -63,12 +55,8 @@ public class PacketBuffer
 
         if (available < 4) return false;
 
-        // Длина читается по текущей позиции чтения, а не по нулю буфера. Чтение
-        // из _buffer[0] работало только потому, что CompactBuffer() безусловно
-        // обнуляет _readPos после каждого успешного Take: инвариант «на входе в
-        // TryTake _readPos == 0» держался на соглашении о порядке вызовов, а не
-        // на коде. Любой путь, оставляющий _readPos > 0 при частичном чтении,
-        // молча рассинхронизировал бы поток кадров.
+        // По позиции чтения, а не по нулю буфера: начало кадра не обязано
+        // совпадать с началом буфера.
         int packetLength = Unsafe.ReadUnaligned<int>(ref _buffer[_readPos]);
 
         if (packetLength < 4)
@@ -88,12 +76,9 @@ public class PacketBuffer
     }
 
     /// <summary>
-    /// Hex-дамп первых байт непрочитанного хвоста буфера.
-    ///
-    /// Единственный способ понять, что прислал противоположный конец, когда
-    /// длину кадра читать уже нельзя: на проводе видно только мусор из
-    /// реюзнутого массива, а число в префиксе говорит лишь «что-то сломалось».
-    /// Диагностика из TryTake попадает в лог хоста вместе с исключением.
+    /// Hex-дамп начала непрочитанного хвоста: когда длину кадра прочитать уже
+    /// нельзя, на проводе видно только мусор из реюзнутого массива. Попадает в
+    /// лог хоста вместе с исключением из <see cref="TryTake"/>.
     /// </summary>
     private string HexHead(int maxBytes)
     {

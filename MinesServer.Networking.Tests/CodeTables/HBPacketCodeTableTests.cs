@@ -7,7 +7,7 @@ namespace MinesServer.Networking.Tests.CodeTables;
 /// Снапшот вложенной таблицы кодов hub-потока (0–5).
 ///
 /// <c>HBPacket</c> — RT-кадр, payload которого список под-пакетов со своим
-/// 1-байтовым кодом. Перестановка Register посередине молча меняет смысл всех
+/// 1-байтовым кодом; перестановка Register посередине молча меняет смысл всех
 /// последующих кодов.
 /// </summary>
 internal class HBPacketCodeTableTests

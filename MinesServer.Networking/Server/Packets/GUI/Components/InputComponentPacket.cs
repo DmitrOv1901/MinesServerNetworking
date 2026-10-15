@@ -8,26 +8,20 @@ public abstract record class InputComponentPacket<TValue> : GUIComponentPacket, 
     public bool IsEnabled { get; init; } = true;
 
     /// <summary>
-    /// Имя элемента. Обязательно: <see cref="INamedComponentPacket"/> требует имени,
-    /// а по проводу оно идёт единственным экземпляром на компонент, поэтому
-    /// без него компонент не идентифицируем.
+    /// Обязательно по <see cref="INamedComponentPacket"/>: по проводу имя идёт
+    /// единственным экземпляром, без него компонент не идентифицируем.
     ///
-    /// Инициализатор <c>null!</c> остаётся намеренно — иначе компонент без
-    /// имени нельзя было бы даже собрать и поймать ошибку в Encode с внятным
-    /// текстом. Проверка стоит в <see cref="Encode"/> и в <see cref="Size"/>.
+    /// Инициализатор <c>null!</c> остаётся намеренно — иначе компонент без имени
+    /// нельзя собрать, чтобы поймать ошибку в <see cref="Encode"/>.
     /// </summary>
     public string Name { get; init; } = null!;
     public abstract TValue DefaultValue { get; init; }
 
     /// <summary>
-    /// Размер компонента. Вызывается на каждой отправке (через
-    /// <c>ServerPacket.Size</c>), поэтому остаётся коротким инлайнимым
-    /// выражением: проверки имени здесь нет — она в <see cref="Encode"/>.
-    ///
-    /// <c>Name?.Length ?? 0</c> вместо <c>Name.Length</c>: без имени
-    /// <c>Size</c> обязан посчитать хоть что-то, а не упасть с
-    /// <c>NullReferenceException</c>. Кодирование всё равно откажет в
-    /// <see cref="EnsureNamed"/>.
+    /// Проверки имени здесь нет намеренно: свойство вызывается на каждой
+    /// отправке через <c>ServerPacket.Size</c>, и проверка внутри сделала бы его
+    /// неинлайнимым. Диагностику даёт <see cref="EnsureNamed"/> — кодирование всё
+    /// равно происходит один раз на пакет.
     /// </summary>
     public override int Size => base.Size
         + sizeof(bool) // IsEnabled
@@ -45,8 +39,8 @@ public abstract record class InputComponentPacket<TValue> : GUIComponentPacket, 
     }
 
     /// <summary>
-    /// Без этой проверки компонент без имени падал в <c>Size</c> или
-    /// <c>Encode</c> с <see cref="NullReferenceException"/> на разыменовании
+    /// Без проверки компонент без имени падал бы с
+    /// <see cref="NullReferenceException"/> на разыменовании
     /// <see cref="string.Length"/>, и вызывающая сторона не получала ни пакета,
     /// ни внятной причины.
     /// </summary>

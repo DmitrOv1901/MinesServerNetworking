@@ -10,10 +10,11 @@ using MinesServer.Networking.Server;
 namespace MinesServer.Networking.Tests;
 
 /// <summary>
+/// <summary>
 /// Негативные тесты на malformed-ввод.
 ///
-/// До них протокол проверялся только в happy path: тесты пустых пакетов проходили
-/// тривиально и одинаково проходили для настоящей реализации и для заглушки.
+/// Покрытия не было: тесты пустых пакетов проходили одинаково и для настоящей
+/// реализации, и для заглушки.
 /// </summary>
 internal class MalformedPacketTests
 {
@@ -24,7 +25,7 @@ internal class MalformedPacketTests
         var full = new byte[frame.Size];
         frame.Encode(full);
 
-        // Обрезанный кадр: длина префикса обещает больше, чем реально пришло.
+        // Префикс обещает больше, чем пришло.
         var truncated = full.AsSpan(0, full.Length - 3).ToArray();
         BinaryPrimitives.WriteInt32LittleEndian(truncated, full.Length);
 
@@ -63,19 +64,16 @@ internal class MalformedPacketTests
     }
 
     /// <summary>
-    /// Регрессия <c>Name = null!</c>: компонент без имени падал в <c>Size</c> и
-    /// <c>Encode</c> с <see cref="NullReferenceException"/> на разыменовании
-    /// <c>string.Length</c>. Вызывающая сторона не получала ни пакета, ни внятной
-    /// причины — падало в произвольном месте.
+    /// Регрессия <c>Name = null!</c>: без имени компонент падал с
+    /// <see cref="NullReferenceException"/>, и вызывающая сторона не получала ни
+    /// пакета, ни внятной причины.
     /// </summary>
     [Test]
     public void UnnamedInputComponent_ThrowsDescriptiveError()
     {
         var unnamed = new TextBoxPacket { DefaultValue = "" };
 
-        // Size не падает: он на горячем пути и обязан вычислиться хоть как-то.
-        // Диагностика приходит из Encode — это единственное место, где имя
-        // действительно требуется.
+        // Size обязан вычислиться: он на горячем пути, диагностика — в Encode.
         int size = unnamed.Size;
         Assert.That(size, Is.EqualTo(unnamed.Size), "Size must be computable without a name");
 
@@ -85,24 +83,21 @@ internal class MalformedPacketTests
     }
 
     /// <summary>
-    /// Имя обязательно, но <see cref="TextBoxPacket.Size"/> не должно это
-    /// проверять: свойство вызывается на каждой отправке через
-    /// <c>ServerPacket.Size</c>, и проверка внутри превратила бы его в метод с
-    /// веткой выброса, то есть почти наверняка в неинлайнимый.
+    /// Имя обязательно, но <see cref="TextBoxPacket.Size"/> проверять его не
+    /// должен: свойство вызывается на каждой отправке, и проверка внутри
+    /// превратила бы его в неинлайнимый метод с веткой выброса.
     /// </summary>
     [Test]
     public void UnnamedInputComponent_SizeIsCheapAndStable()
     {
-        // Оба экземпляра безымянные: проверка в том, что Size вычислим и не падает, а
-        // разница с именованным — это ровно префикс плюс длина имени.
         var unnamed = new TextBoxPacket { DefaultValue = "" };
         var named = new TextBoxPacket { Name = "abc", DefaultValue = "" };
 
         Assert.Multiple(() =>
         {
             Assert.That(unnamed.Size, Is.GreaterThan(0));
-            // Префикс длины (1 байт) входит в Size при любом Name — он указывает, сколько
-            // символов идёт следом, и при пустом имени тоже нужен.
+            // Префикс длины (1 байт) входит в Size при любом Name — при пустом имени он
+            // тоже нужен, он равен нулю.
             Assert.That(named.Size - unnamed.Size, Is.EqualTo("abc".Length),
                 "a name must add exactly its own length; the prefix is counted either way");
         });

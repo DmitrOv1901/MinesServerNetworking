@@ -5,8 +5,8 @@ using MinesServer.Networking.Exceptions;
 namespace MinesServer.Networking.Tests.Connection;
 
 /// <summary>
-/// Тесты кадрирования. До них у <see cref="PacketBuffer"/> не было ни одного
-/// теста, хотя именно он держит синхронизацию потока кадров.
+/// Тесты кадрирования: <see cref="PacketBuffer"/> держит синхронизацию потока
+/// кадров, и покрытия у него не было.
 /// </summary>
 internal class PacketBufferTests
 {
@@ -15,10 +15,8 @@ internal class PacketBufferTests
     private static void Feed(PacketBuffer buffer, byte[] data, int offset, int length) => buffer.Put(data, offset, length);
 
     /// <summary>
-    /// Собирает кадр: префикс длины — это полный размер кадра, включая сам
-    /// префикс, то есть ровно <c>buffer.Length</c> (так же считает
-    /// <c>ServerPacket.Encode</c>). TryTake возвращает кадр целиком, вместе с
-    /// префиксом.
+    /// Префикс длины — это полный размер кадра вместе с самим префиксом (так же
+    /// считает <c>ServerPacket.Encode</c>), и TryTake возвращает кадр целиком.
     /// </summary>
     private static byte[] Frame(params byte[] payload)
     {
@@ -58,12 +56,10 @@ internal class PacketBufferTests
     }
 
     /// <summary>
-    /// Регрессия чтения длины кадра из <c>_buffer[0]</c> вместо
-    /// <c>_buffer[_readPos]</c>.
-    ///
-    /// С багом два кадра в одном Put декодировались как один и тот же первый кадр:
-    /// TryTake брал длину из нулевой позиции, но копировал тело из <c>_readPos</c>.
-    /// В бою это выглядело бы как «клиент иногда повторяет действие».
+    /// Чтение длины из <c>_buffer[0]</c> вместо <c>_buffer[_readPos]</c> давало
+    /// два одинаковых кадра из двух разных: длина бралась из нулевой позиции, а
+    /// тело — из <c>_readPos</c>. В бою это выглядело бы как «клиент иногда
+    /// повторяет действие».
     /// </summary>
     [Test]
     public void TwoFramesInOnePut_AreTakenSeparatelyAndInOrder()
@@ -121,10 +117,8 @@ internal class PacketBufferTests
     }
 
     /// <summary>
-    /// Кадр приходит двумя сетевыми чтениями так, что второе заканчивается
-    /// посреди следующего кадра. Это единственный путь, где TryTake вызывается
-    /// при непустой позиции чтения, не сбросив её предварительно, — и именно
-    /// он ловил чтение длины из <c>_buffer[0]</c>.
+    /// Единственный путь, где TryTake вызывается при непустой позиции чтения:
+    /// второе сетевое чтение заканчивается посреди следующего кадра.
     /// </summary>
     [Test]
     public void SplitFrameEndingInsideNextFrame_IsResynchronised()
@@ -133,12 +127,11 @@ internal class PacketBufferTests
         var first = Frame([0xCC, 0xDD, 0xEE]);
         var second = Frame([0x11, 0x22]);
 
-        // Первое чтение — весь первый кадр плюс первые 4 байта второго.
+        // Первое чтение заканчивается посреди второго кадра.
         Feed(buffer, first.Concat(second.AsSpan(0, 4).ToArray()).ToArray());
         Assert.That(buffer.TryTake(out var takenFirst), Is.True);
         Assert.That(takenFirst, Is.EqualTo(first));
 
-        // Второе чтение — остаток второго кадра.
         Feed(buffer, second.AsSpan(4).ToArray());
         Assert.That(buffer.TryTake(out var takenSecond), Is.True);
         Assert.That(takenSecond, Is.EqualTo(second));
@@ -159,8 +152,8 @@ internal class PacketBufferTests
     }
 
     /// <summary>
-    /// NetCoreServer отдаёт принятые данные в реюзнутом массиве, поэтому offset
-    /// обязателен: копирование всегда с нуля подмешивает мусор.
+    /// offset обязателен: NetCoreServer отдаёт данные в реюзнутом массиве, где
+    /// полезные данные не обязаны лежать с нуля.
     /// </summary>
     [Test]
     public void Put_WithNonZeroOffset_CopiesOnlyRequestedRange()
@@ -187,8 +180,7 @@ internal class PacketBufferTests
     }
 
     /// <summary>
-    /// Проверка лимита живёт в TryTake, а не в Put: Put только складывает
-    /// данные, кадр проверяется при попытке выделить из буфера.
+    /// Лимит проверяется в TryTake, а не в Put: Put только складывает данные.
     /// </summary>
     [Test]
     public void FrameLongerThanLimit_IsRejected()
@@ -219,15 +211,14 @@ internal class PacketBufferTests
     }
 
     /// <summary>
-    /// Буфер перевыделяется при росте кадра, и непрочитанные данные обязаны
-    /// пережить перевыделение вместе с позицией чтения.
+    /// Непрочитанные данные обязаны пережить перевыделение буфера.
     /// </summary>
     [Test]
     public void BufferGrowth_KeepsPendingFrameIntact()
     {
         var buffer = new PacketBuffer(initialCapacity: 16, maxLength: 1024 * 1024);
 
-        // Кадр крупнее начальной ёмкости — EnsureCapacity обязан перенести данные.
+        // Кадр крупнее начальной ёмкости, то есть вызовет EnsureCapacity.
         var big = FrameOfLength(8192);
         Feed(buffer, big);
 
@@ -236,9 +227,8 @@ internal class PacketBufferTests
     }
 
     /// <summary>
-    /// Кадр приходит двумя сетевыми чтениями, и между ними буфер перевыделяется
-    /// по EnsureCapacity. Позиция чтения и непрочитанные данные обязаны пережить
-    /// перевыделение.
+    /// Между двумя сетевыми чтениями буфер перевыделяется по EnsureCapacity:
+    /// позиция чтения и непрочитанные данные обязаны это пережить.
     /// </summary>
     [Test]
     public void PartialFrameSpanningBufferGrowth_IsResynchronised()

@@ -24,10 +24,9 @@ public readonly record struct LzmaPacket(IRootServerPacket Payload) : IRootServe
 
     public int Encode(Span<byte> output)
     {
-        // Размер ровно того, что пишем. ArrayPool.Rent возвращает буфер больше
-        // запрошенного, поэтому сжимать весь арендованный буфер нельзя: в поток
-        // уходил хвост произвольного размера и содержимого, а в заголовок писалась
-        // длина аренды вместо фактически записанных данных.
+        // Сжимается префикс записанного, а не весь арендованный буфер: Rent возвращает
+        // больше запрошенного, и в заголовок ушла бы длина аренды вместо
+        // фактически записанных данных.
         int uncompressedSize = sizeof(ushort) + Payload.Size;
         byte[] encoded = ArrayPool<byte>.Shared.Rent(uncompressedSize);
         try
@@ -57,8 +56,8 @@ public readonly record struct LzmaPacket(IRootServerPacket Payload) : IRootServe
 
     public static LzmaPacket Decode(ReadOnlySpan<byte> input)
     {
-        // Механизм отличается от LZ4: размер идёт напрямую как int32 из провода,
-        // мимо Read4(), и уходит в outSize LzmaStream без всякой проверки.
+        // Размер идёт напрямую как int32 мимо Read4(), в отличие от LZ4, и уходит
+        // в outSize LzmaStream — поэтому проверять надо здесь же.
         if (input.Length < sizeof(int))
             throw new PacketDecodeException($"LZMA frame is truncated: {input.Length} bytes, expected at least {sizeof(int)}");
 

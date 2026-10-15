@@ -34,9 +34,8 @@ public class TcpConnection : TcpClient, IServerConnection
             }
             catch (Exception ex)
             {
-                // Кадр уже потреблён буфером, поэтому цикл продолжается: поток
-                // кадров остаётся синхронным. Выход из метода здесь отбросил бы
-                // все кадры, уже лежащие в буфере.
+                // continue, а не return: кадр уже потреблён, и выход отбросил бы
+                // всё, что уже лежит в буфере.
                 _decodeErrorCount++;
                 _onError?.Invoke(ex);
                 continue;

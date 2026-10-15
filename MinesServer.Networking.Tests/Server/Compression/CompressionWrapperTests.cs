@@ -12,12 +12,8 @@ namespace MinesServer.Networking.Tests.Server.Compression;
 /// Общие проверки обёрток сжатия: заголовок обязан совпадать с фактически
 /// сжатыми данными, а объявленный размер распаковки — проверяться до аллокации.
 ///
-/// Баг, который здесь закрывается: обе обёртки сжимали мусорный хвост.
-/// LZ4 кодировал весь буфер, выделенный под худший случай, и писал в заголовок
-/// позицию writer'а; LZMA кодировал весь буфер из ArrayPool.Rent (он больше
-/// запрошенного) и писал в заголовок длину аренды. Round-trip проходил — хвост
-/// декодер игнорирует, — но каждый кадр раздувался мусором, а заголовок не
-/// соответствовал содержимому.
+/// Round-trip с мусорным хвостом проходил (декодер хвост игнорирует), поэтому
+/// нужен прямой тест на заголовок.
 /// </summary>
 internal class CompressionWrapperTests
 {
@@ -30,8 +26,7 @@ internal class CompressionWrapperTests
     /// Payload крупнее прежнего порога stackalloc (1 МБ).
     ///
     /// Один <see cref="TextPacket"/> не годится: его текст идёт с префиксом ushort,
-    /// то есть максимум 65535 символов (~128 КБ). Большой payload собирается из
-    /// множества дочерних элементов.
+    /// максимум 65535 символов.
     /// </summary>
     private static OpenWindowPacket LargePayload()
     {
@@ -44,8 +39,8 @@ internal class CompressionWrapperTests
     }
 
     /// <summary>
-    /// Заголовок = ровно столько байт, сколько фактически сжато, и это ровно
-    /// длина закодированного payload'а (код пакета + payload).
+    /// Заголовок = длина фактически закодированного prefix'а (код пакета + payload),
+    /// а не длина арендованного буфера.
     /// </summary>
     [Test]
     public void LZ4_HeaderEqualsActualCompressedInputSize()
@@ -84,8 +79,7 @@ internal class CompressionWrapperTests
     }
 
     /// <summary>
-    /// Round-trip по-прежнему обязан проходить: починка префикса не должна была
-    /// сломать декодирование.
+    /// Починка префикса не должна была сломать декодирование.
     /// </summary>
     [Test]
     public void LZ4_RoundTripsPayload()
@@ -110,13 +104,12 @@ internal class CompressionWrapperTests
     }
 
     /// <summary>
-    /// Бомба: кадр в пару байт, объявляющий ~2 ГБ. Без проверки заголовка
-    /// LZ4 домножает его (<c>MaximumOutputSize</c>), а LZMA отдаёт напрямую в
-    /// <c>outSize</c> — обе аллоцируют по запросу из провода.
+    /// Кадр в пару байт, объявляющий ~2 ГБ. Без проверки заголовка LZ4 домножает
+    /// его (<c>MaximumOutputSize</c>), а LZMA отдаёт напрямую в <c>outSize</c> —
+    /// обе аллоцируют по запросу из провода.
     ///
-    /// Эксплуатируют обе обёртки в направлении server → client, то есть удалённый
-    /// игрок на них повлиять не может: угроза — MITM (в протоколе нет ни TLS, ни
-    /// подписи) или скомпрометированный сервер.
+    /// Обе обёртки декодируются на клиенте, то есть удалённый игрок на них не
+    /// влияет: вектор — MITM (в протоколе нет ни TLS, ни подписи).
     /// </summary>
     [Test]
     public void LZ4_OversizedHeaderIsRejectedBeforeAllocation()
@@ -187,9 +180,8 @@ internal class CompressionWrapperTests
     }
 
     /// <summary>
-    /// Регрессия stackalloc: порог был 4 МБ при дефолтном размере стека 1 МБ,
-    /// то есть payload крупнее 1 МБ переполнял стек. Теперь используется
-    /// ArrayPool, поэтому большой payload обязан кодироваться без падения.
+    /// Регрессия stackalloc: порог был 4 МБ при стеке 1 МБ, то есть payload
+    /// крупнее 1 МБ переполнял стек.
     /// </summary>
     [Test]
     public void LZ4_LargePayloadBeyondStackallocThreshold_DoesNotOverflowStack()
@@ -221,8 +213,8 @@ internal class CompressionWrapperTests
     }
 
     /// <summary>
-    /// Сжатый кадр обязан быть меньше несжатого для сжимаемого payload — иначе
-    /// мусорный хвост съедает всю экономию и кадр раздувается.
+    /// Сжимаемый payload обязан ужиматься: иначе мусорный хвост съедает всю
+    /// экономию.
     /// </summary>
     [Test]
     public void LZ4_CompressiblePayloadActuallyShrinks()

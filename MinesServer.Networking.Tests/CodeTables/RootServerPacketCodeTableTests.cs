@@ -18,14 +18,11 @@ namespace MinesServer.Networking.Tests.CodeTables;
 /// <summary>
 /// Снапшот таблицы кодов серверных пакетов (0–49).
 ///
-/// Wire-код пакета — это его позиция в порядке вызовов Register в
-/// <see cref="RootServerPacketCodeProvider"/>, то есть он нигде не записан
-/// явно. Перестановка вызова молча перенумеровывает протокол: клиент начнёт
-/// декодировать payload не тем пакетом, и ошибка всплывёт не в тестах, а в игре.
+/// Код — позиция вызова Register, нигде не записанная явно, поэтому перестановка
+/// молча перенумеровывает протокол, и падение приходит не в тестах, а в игре.
 ///
-/// Таблица продублирована в репозитории сервера (MinesServer.Tests/Networking)
-/// намеренно: пока она жила только там, протокол можно было сломать здесь, и
-/// падал бы сервер.
+/// Таблицы живут здесь, а не в репозитории сервера: пока они были там, протокол
+/// можно было сломать здесь, и падал бы сервер.
 /// </summary>
 internal class RootServerPacketCodeTableTests
 {
@@ -88,10 +85,8 @@ internal class RootServerPacketCodeTableTests
     }
 
     /// <summary>
-    /// Код 0 обязан быть валиден. Регрессия: <c>IsValid</c> на ветке net7+
-    /// использовал <c>IBinaryInteger.IsPositive</c>, то есть строго положительное
-    /// число, и отвергал ноль — из-за чего <c>OutdatedClientPacket</c> нельзя было
-    /// декодировать и сервер не мог отказать устаревшему клиенту.
+    /// Код 0 валиден: <c>IsPositive</c> отвергал ноль, и отказ по версии клиента
+    /// (<c>OutdatedClientPacket</c>) нельзя было декодировать.
     /// </summary>
     [Test]
     public void CodeZero_IsValidAndDecodes()
@@ -101,7 +96,6 @@ internal class RootServerPacketCodeTableTests
             Assert.That(RootServerPacketCodeProvider.IsValid((ushort)0), Is.True);
             Assert.That(RootServerPacketCodeProvider.TryGetDecoder((ushort)0, out var decoder), Is.True);
             Assert.That(decoder, Is.Not.Null);
-            Assert.That(decoder!, Is.Not.Null, "код 0 обязан адресовать первый зарегистрированный пакет");
         });
     }
 

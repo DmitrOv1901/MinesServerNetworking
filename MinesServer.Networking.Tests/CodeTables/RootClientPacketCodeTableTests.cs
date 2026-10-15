@@ -13,9 +13,8 @@ namespace MinesServer.Networking.Tests.CodeTables;
 /// <summary>
 /// Снапшот таблицы кодов клиентских пакетов (0–25).
 ///
-/// Код — позиция вызова Register в <see cref="RootClientPacketCodeProvider"/>.
 /// Таблица уже расходилась с серверной: клиент добавил
-/// <c>OpenProgramListClickPacket</c>, сервер о нём не знал, все коды после 18
+/// <c>OpenProgramListClickPacket</c>, сервер о нём не знал, коды после 18
 /// сдвинулись, и клиентские пакеты сервер декодировал как чужие.
 /// </summary>
 internal class RootClientPacketCodeTableTests
@@ -55,9 +54,8 @@ internal class RootClientPacketCodeTableTests
     }
 
     /// <summary>
-    /// Код 0 обязателен для валидности: <c>ClientHelloPacket</c> — это рукопожатие.
-    /// Регрессия: на net7+ <c>IsValid</c> отвергал ноль через <c>IsPositive</c>,
-    /// и рукопожатие не декодировалось ни на одной из веток сборки.
+    /// Код 0 валиден: <c>IsPositive</c> отвергал ноль, и рукопожатие
+    /// (<c>ClientHelloPacket</c>) не декодировалось ни на одной из веток сборки.
     /// </summary>
     [Test]
     public void CodeZero_IsValidAndDecodes()

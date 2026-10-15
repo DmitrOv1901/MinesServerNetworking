@@ -32,9 +32,8 @@ public class TcpConnection : TcpSession, IClientConnection
             }
             catch (Exception ex)
             {
-                // Кадр уже потреблён буфером, поэтому цикл продолжается: поток
-                // кадров остаётся синхронным. Выход из метода здесь отбросил бы
-                // все кадры, уже лежащие в буфере.
+                // continue, а не return: кадр уже потреблён, и выход отбросил бы
+                // всё, что уже лежит в буфере.
                 _decodeErrorCount++;
                 _onError?.Invoke(ex);
                 continue;
@@ -165,10 +164,7 @@ public class TcpConnection : TcpSession, IClientConnection
 
     public void Connect()
     {
-        // Серверная половина не инициирует соединение: сессию создаёт TcpServer,
-        // а Connect() в IConnection нужен только клиенту. Раньше здесь стоял
-        // NotImplementedException, который вылетал как необработанное исключение
-        // при попытке вызвать метод, заведомо лишний для этой стороны.
+        // Connect() в IConnection нужен только клиенту: сессию создаёт TcpServer.
         throw new NotSupportedException($"{nameof(TcpConnection)} is the server side of the transport and cannot initiate a connection. Use {nameof(TcpServer)} instead.");
     }
 
