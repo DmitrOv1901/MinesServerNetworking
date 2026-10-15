@@ -95,8 +95,14 @@ namespace MinesServer.Networking
         /// внутри одного файла. Обе ветки приведены к <c>&gt;= Zero</c>.
         /// </summary>
         public static bool IsValid(TIdentity identity) =>
-            Number.GreaterThanOrEqual(identity, Number.Zero<TIdentity>())
-                && Number.LessThan(identity, MaxIdentity);
+#if NET7_0_OR_GREATER
+            // Современная ветка: операторы IBinaryInteger дешевле Number<T> из
+            // Genumerics. Серверу нужен максимум производительности сетевого
+            // стека, клиент на net481 считает через Number.
+            identity >= TIdentity.Zero && identity < MaxIdentity;
+#else
+            Number.GreaterThanOrEqual(identity, Number.Zero<TIdentity>()) && Number.LessThan(identity, MaxIdentity);
+#endif
 
         public static class Cache<TPacket> where TPacket : TPacketType
         {

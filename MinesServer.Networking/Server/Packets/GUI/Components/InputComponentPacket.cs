@@ -19,17 +19,20 @@ public abstract record class InputComponentPacket<TValue> : GUIComponentPacket, 
     public string Name { get; init; } = null!;
     public abstract TValue DefaultValue { get; init; }
 
-    public override int Size
-    {
-        get
-        {
-            EnsureNamed();
-            return base.Size
-                + sizeof(bool) // IsEnabled
-                + sizeof(byte) // Name.Length
-                + Name.Length; // Name
-        }
-    }
+    /// <summary>
+    /// Размер компонента. Вызывается на каждой отправке (через
+    /// <c>ServerPacket.Size</c>), поэтому остаётся коротким инлайнимым
+    /// выражением: проверки имени здесь нет — она в <see cref="Encode"/>.
+    ///
+    /// <c>Name?.Length ?? 0</c> вместо <c>Name.Length</c>: без имени
+    /// <c>Size</c> обязан посчитать хоть что-то, а не упасть с
+    /// <c>NullReferenceException</c>. Кодирование всё равно откажет в
+    /// <see cref="EnsureNamed"/>.
+    /// </summary>
+    public override int Size => base.Size
+        + sizeof(bool) // IsEnabled
+        + sizeof(byte) // Name.Length
+        + (Name?.Length ?? 0); // Name
 
     public override int Encode(Span<byte> output)
     {

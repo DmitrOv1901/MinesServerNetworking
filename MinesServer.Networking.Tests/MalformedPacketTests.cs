@@ -73,12 +73,39 @@ internal class MalformedPacketTests
     {
         var unnamed = new TextBoxPacket { DefaultValue = "" };
 
-        var fromSize = Assert.Throws<InvalidOperationException>(() => _ = unnamed.Size);
-        Assert.That(fromSize!.Message, Does.Contain("Name"));
+        // Size не падает: он на горячем пути и обязан вычислиться хоть как-то.
+        // Диагностика приходит из Encode — это единственное место, где имя
+        // действительно требуется.
+        int size = unnamed.Size;
+        Assert.That(size, Is.EqualTo(unnamed.Size), "Size must be computable without a name");
 
         var fromEncode = Assert.Throws<InvalidOperationException>(
-            () => unnamed.Encode(new byte[64]));
+            () => unnamed.Encode(new byte[size]));
         Assert.That(fromEncode!.Message, Does.Contain("Name"));
+    }
+
+    /// <summary>
+    /// Имя обязательно, но <see cref="TextBoxPacket.Size"/> не должно это
+    /// проверять: свойство вызывается на каждой отправке через
+    /// <c>ServerPacket.Size</c>, и проверка внутри превратила бы его в метод с
+    /// веткой выброса, то есть почти наверняка в неинлайнимый.
+    /// </summary>
+    [Test]
+    public void UnnamedInputComponent_SizeIsCheapAndStable()
+    {
+        // Оба экземпляра безымянные: проверка в том, что Size вычислим и не падает, а
+        // разница с именованным — это ровно префикс плюс длина имени.
+        var unnamed = new TextBoxPacket { DefaultValue = "" };
+        var named = new TextBoxPacket { Name = "abc", DefaultValue = "" };
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(unnamed.Size, Is.GreaterThan(0));
+            // Префикс длины (1 байт) входит в Size при любом Name — он указывает, сколько
+            // символов идёт следом, и при пустом имени тоже нужен.
+            Assert.That(named.Size - unnamed.Size, Is.EqualTo("abc".Length),
+                "a name must add exactly its own length; the prefix is counted either way");
+        });
     }
 
     [Test]
