@@ -1,5 +1,5 @@
-﻿#if !NET7_0_OR_GREATER
-using Genumerics;
+﻿using Genumerics;
+#if !NET7_0_OR_GREATER
 using System.Reflection;
 using System.Reflection.Emit;
 #endif
@@ -85,12 +85,18 @@ namespace MinesServer.Networking
             return true;
         }
 
+        /// <summary>
+        /// Код 0 валиден: первому зарегистрированному пакету соответствует именно ноль.
+        /// Ветка net7+ раньше использовала <see cref="IBinaryInteger{T}.IsPositive(T)"/>,
+        /// то есть строго положительное число, и отвергала код 0 — из-за чего не
+        /// декодировались <c>ClientHelloPacket</c> (рукопожатие) и
+        /// <c>OutdatedClientPacket</c> (отказ по версии клиента) на net7+.
+        /// Ветка net481 использовала <c>&gt;= Zero</c>, то есть расхождение жило
+        /// внутри одного файла. Обе ветки приведены к <c>&gt;= Zero</c>.
+        /// </summary>
         public static bool IsValid(TIdentity identity) =>
-#if NET7_0_OR_GREATER
-            TIdentity.IsPositive(identity) && identity < MaxIdentity;
-#else
-            Number.GreaterThanOrEqual(identity, Number.Zero<TIdentity>()) && Number.LessThan(identity, MaxIdentity);
-#endif
+            Number.GreaterThanOrEqual(identity, Number.Zero<TIdentity>())
+                && Number.LessThan(identity, MaxIdentity);
 
         public static class Cache<TPacket> where TPacket : TPacketType
         {

@@ -14,4 +14,15 @@
     <ProjectReference Include="..\MinesServer.Networking.Connection\MinesServer.Networking.Connection.csproj" />
   </ItemGroup>
 
+  <!--
+    Промежуточные файлы собираются в obj~\ (см. Directory.Build.props), но старый
+    каталог obj/ может остаться после смены пути — без исключения его *.cs
+    попадают в компиляцию и дают CS0579 (дублирующиеся сгенерированные атрибуты).
+  -->
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <None Remove="obj\**" />
+  </ItemGroup>
+
 </Project>

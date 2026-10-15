@@ -1,0 +1,66 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{json,yml,yaml,slnx,props,targets}]
+indent_size = 2
+
+[*.{csproj,sln}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+# Область видимости
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# this.
+csharp_style_qualification_this = false:suggestion
+
+# using
+csharp_using_directive_placement = outside_namespace:suggestion
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# Именование. IDE1006 не подавлен: соглашения проверяются, поэтому
+# mechanical-рефакторинг (например Pack -> Building) подсвечивает конфликты имён.
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+dotnet_naming_style.camel_case.capitalization = camel_case
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.style = pascal_case
+dotnet_naming_symbols.types.applicable_kinds = class,struct,enum,delegate
+dotnet_naming_symbols.types.style = pascal_case
+dotnet_naming_symbols.methods.applicable_kinds = method
+dotnet_naming_symbols.methods.style = pascal_case
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_styles = underscore_camel_case
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_styling = static_field
+dotnet_naming_symbols.constants.style = pascal_case
+dotnet_naming_rule.types_are_pascal_case.symbols = types
+dotnet_naming_rule.types_are_pascal_case.style = types
+dotnet_naming_rule.types_are_pascal_case.severity = suggestion
+dotnet_naming_rule.interfaces_are_pascal_case.symbols = interfaces
+dotnet_naming_rule.interfaces_are_pascal_case.style = interfaces
+dotnet_naming_rule.interfaces_are_pascal_case.severity = suggestion
+dotnet_naming_rule.methods_are_pascal_case.symbols = methods
+dotnet_naming_rule.methods_are_pascal_case.style = methods
+dotnet_naming_rule.methods_are_pascal_case.severity = suggestion
+
+# Прочее
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_prefer_braces = true:suggestion
+dotnet_style_prefer_conditional_expression_over_return = false:none
+
+# Анализаторы
+dotnet_analyzer_diagnostic.severity = warning
