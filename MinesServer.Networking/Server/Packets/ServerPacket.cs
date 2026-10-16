@@ -19,21 +19,21 @@ public readonly record struct ServerPacket(IRootServerPacket Payload) : IServerP
             var length = reader.Read4();
             var packetCode = reader.ReadU2();
             if (!RootServerPacketCodeProvider.TryGetDecoder(packetCode, out var decoder))
-                throw new PacketDecodeException("Unknown packet code");
+                throw new PacketDecodeException("Unknown packet code", input);
             var result = new ServerPacket(decoder(reader.Remaining));
             if (result.Payload is IUnreliableLengthPacket) {
                 if (result.Size < length)
-                    throw new PacketDecodeException("Invalid packet length");
+                    throw new PacketDecodeException("Invalid packet length", input);
             }
             else if(result.Size != length)
-                throw new PacketDecodeException("Invalid packet length");
+                throw new PacketDecodeException("Invalid packet length", input);
 
             return result;
         }
         catch (PacketDecodeException) { throw; }
         catch (Exception e)
         {
-            throw new PacketDecodeException("Packet failed to decode, potentially malicious payload", e);
+            throw new PacketDecodeException("Packet failed to decode, potentially malicious payload", e, input);
         }
     }
 

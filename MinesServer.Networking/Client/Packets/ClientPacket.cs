@@ -22,21 +22,21 @@ public readonly record struct ClientPacket(uint Timestamp, IRootClientPacket Dat
             var timestamp = reader.ReadU4();
             var packetCode = reader.ReadU1();
             if (!RootClientPacketCodeProvider.TryGetDecoder(packetCode, out var decoder))
-                throw new PacketDecodeException("Unknown packet code");
+                throw new PacketDecodeException("Unknown packet code", input);
             var result = new ClientPacket(timestamp, decoder(reader.Remaining));
             if (result.Data is IUnreliableLengthPacket)
             {
                 if (result.Size < length)
-                    throw new PacketDecodeException("Invalid packet length");
+                    throw new PacketDecodeException("Invalid packet length", input);
             }
             else if (result.Size != length)
-                throw new PacketDecodeException("Invalid packet length");
+                throw new PacketDecodeException("Invalid packet length", input);
             return result;
         }
         catch (PacketDecodeException) { throw; }
         catch (Exception e)
         {
-            throw new PacketDecodeException("Packet failed to decode, potentially malicious payload", e);
+            throw new PacketDecodeException("Packet failed to decode, potentially malicious payload", e, input);
         }
     }
 

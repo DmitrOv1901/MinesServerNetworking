@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MinesServer.Networking\MinesServer.Networking.csproj" />
     <ProjectReference Include="..\MinesServer.Networking.Connection\MinesServer.Networking.Connection.csproj" />
+    <ProjectReference Include="..\MinesServer.Networking.Connection.Server\MinesServer.Networking.Connection.Server.csproj" />
   </ItemGroup>
 
   <!--
