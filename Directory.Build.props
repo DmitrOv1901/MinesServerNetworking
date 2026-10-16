@@ -1,0 +1,23 @@
+<Project>
+
+  <!--
+    Общие свойства сборки для всех проектов репозитория.
+
+    Каталоги вывода заканчиваются на `~` намеренно: Unity не импортирует
+    директории, чьё имя заканчивается на `~`, поэтому артефакты сборки пакетов
+    не засоряют проект клиента. По этой же причине стандартные правила
+    .gitignore (`bin/`, `obj/`) их не покрывают — покрывает .gitignore репозитория.
+
+    Свойства заданы здесь, а не в каждом .csproj, потому что .csproj
+    (SDK-style) подключается уже после Microsoft.Common.props. Там они
+    переопределяют BaseIntermediateOutputPath слишком поздно, и MSBuild
+    предупреждает MSB3539 на каждой сборке, а NuGet пишет вывод по старому
+    пути. Directory.Build.props подключается до common props, поэтому
+    предупреждение исчезает, а поведение совпадает.
+  -->
+  <PropertyGroup>
+    <BaseIntermediateOutputPath>obj~\</BaseIntermediateOutputPath>
+    <OutputPath>bin~\</OutputPath>
+  </PropertyGroup>
+
+</Project>

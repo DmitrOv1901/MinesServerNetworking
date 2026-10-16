@@ -16,4 +16,16 @@ public interface IConnection<TReceivePacket, TSendPacket> : IDisposable
     public event Action OnDisconnected;
     public event Action OnDisconnecting;
     public event Action OnConnecting;
+
+    /// <summary>
+    /// Кадр потреблён и отброшен. Поток кадров остаётся синхронным, соединение
+    /// цело — решение о дисконнекте принимает хост (пороги у клиента и сервера
+    /// разные).
+    /// </summary>
+    public event Action<Exception> OnError;
+
+    /// <summary>
+    /// Счётчик для политики «N ошибок — дисконнект» на стороне хоста.
+    /// </summary>
+    public int DecodeErrorCount { get; }
 }

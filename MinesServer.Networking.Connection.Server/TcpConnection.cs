@@ -11,16 +11,33 @@ public class TcpConnection : TcpSession, IClientConnection
 
     bool _isDisconnecting = false;
 
+    private int _decodeErrorCount;
+
     public TcpConnection(TcpServer server) : base(server)
     {
     }
 
+    public int DecodeErrorCount => _decodeErrorCount;
+
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
         base.OnReceived(buffer, offset, size);
-        _buffer.Put(buffer, (int)size);
-        while(_buffer.TryTake(out var completeBuffer)) {
-            var packet = ClientPacket.Decode(completeBuffer);
+        _buffer.Put(buffer, (int)offset, (int)size);
+        while (_buffer.TryTake(out var completeBuffer))
+        {
+            ClientPacket packet;
+            try
+            {
+                packet = ClientPacket.Decode(completeBuffer);
+            }
+            catch (Exception ex)
+            {
+                // continue, а не return: кадр уже потреблён, и выход отбросил бы
+                // всё, что уже лежит в буфере.
+                _decodeErrorCount++;
+                _onError?.Invoke(ex);
+                continue;
+            }
             _onReceived?.Invoke(packet);
         }
     }
@@ -68,6 +85,23 @@ public class TcpConnection : TcpSession, IClientConnection
             _onReceived -= value;
         }
     }
+
+    private event Action<Exception> _onError;
+
+    event Action<Exception> IConnection<ClientPacket, ServerPacket>.OnError
+    {
+        add
+        {
+            _onError += value;
+        }
+
+        remove
+        {
+            _onError -= value;
+        }
+    }
+
+    int IConnection<ClientPacket, ServerPacket>.DecodeErrorCount => _decodeErrorCount;
 
     private event Action _onConnected;
 
@@ -130,7 +164,8 @@ public class TcpConnection : TcpSession, IClientConnection
 
     public void Connect()
     {
-        throw new NotImplementedException();
+        // Connect() в IConnection нужен только клиенту: сессию создаёт TcpServer.
+        throw new NotSupportedException($"{nameof(TcpConnection)} is the server side of the transport and cannot initiate a connection. Use {nameof(TcpServer)} instead.");
     }
 
     public void SendAsync(ServerPacket packet)

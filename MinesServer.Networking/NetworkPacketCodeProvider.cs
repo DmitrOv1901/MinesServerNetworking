@@ -1,5 +1,5 @@
-﻿#if !NET7_0_OR_GREATER
-using Genumerics;
+﻿using Genumerics;
+#if !NET7_0_OR_GREATER
 using System.Reflection;
 using System.Reflection.Emit;
 #endif
@@ -85,9 +85,17 @@ namespace MinesServer.Networking
             return true;
         }
 
+        /// <summary>
+        /// Нижняя граница включающая: код 0 соответствует первому
+        /// зарегистрированному пакету. <c>IsPositive</c> — строго положительное
+        /// число — отвергал ноль, и на net7+ не декодировались
+        /// <c>ClientHelloPacket</c> и <c>OutdatedClientPacket</c>.
+        /// </summary>
         public static bool IsValid(TIdentity identity) =>
 #if NET7_0_OR_GREATER
-            TIdentity.IsPositive(identity) && identity < MaxIdentity;
+            // Ветки обязаны оставаться разными: операторы IBinaryInteger дешевле
+            // Number<T>, и сервер на net9.0 выжимает максимум из сетевого стека.
+            identity >= TIdentity.Zero && identity < MaxIdentity;
 #else
             Number.GreaterThanOrEqual(identity, Number.Zero<TIdentity>()) && Number.LessThan(identity, MaxIdentity);
 #endif
