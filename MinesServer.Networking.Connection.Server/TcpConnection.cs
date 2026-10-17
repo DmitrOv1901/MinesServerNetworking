@@ -33,7 +33,9 @@ public class TcpConnection : TcpSession, IClientConnection
             catch (Exception ex)
             {
                 // continue, а не return: кадр уже потреблён, и выход отбросил бы
-                // всё, что уже лежит в буфере.
+                // всё, что уже лежит в буфере. Битый кадр несимметричен с
+                // битой длиной выше: тот рвёт поток, и OnError про него молчит
+                // намеренно.
                 _decodeErrorCount++;
                 _onError?.Invoke(ex);
                 continue;
@@ -170,9 +172,11 @@ public class TcpConnection : TcpSession, IClientConnection
 
     public void SendAsync(ServerPacket packet)
     {
-        Span<byte> span = stackalloc byte[packet.Size];
-        packet.Encode(span);
-        SendAsync(span);
+        // Не stackalloc: Size не ограничен сверху ничем, кроме лимита кадра в
+        // 4 МБ, а кадр такого размера на стеке не помещается.
+        var buffer = new byte[packet.Size];
+        packet.Encode(buffer);
+        SendAsync(buffer);
     }
 
     protected override void OnDisconnecting()

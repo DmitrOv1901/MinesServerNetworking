@@ -1,7 +1,6 @@
 ﻿using MinesServer.Networking.Exceptions;
 using System;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace MinesServer.Networking.Connection;
 
@@ -60,10 +59,10 @@ public class PacketBuffer
         int packetLength = Unsafe.ReadUnaligned<int>(ref _buffer[_readPos]);
 
         if (packetLength < 4)
-            throw new PacketDecodeException($"Packet length is too small: {packetLength}; head={HexHead(32)}");
+            throw new PacketDecodeException($"Packet length is too small: {packetLength}", FrameHead());
 
         if (packetLength > _maxLength)
-            throw new PacketDecodeException($"Packet length is too long: {packetLength} (limit {_maxLength}); head={HexHead(32)}");
+            throw new PacketDecodeException($"Packet length is too long: {packetLength} (limit {_maxLength})", FrameHead());
 
         if (available < packetLength) return false;
 
@@ -76,24 +75,15 @@ public class PacketBuffer
     }
 
     /// <summary>
-    /// Hex-дамп начала непрочитанного хвоста: когда длину кадра прочитать уже
-    /// нельзя, на проводе видно только мусор из реюзнутого массива. Попадает в
-    /// лог хоста вместе с исключением из <see cref="TryTake"/>.
+    /// Непрочитанный хвост: когда длину кадра прочитать уже нельзя, на проводе
+    /// видно только мусор из реюзнутого массива, и без дампа сообщение
+    /// бесполезно. Сами байты едут в исключении — хост логирует
+    /// <see cref="PacketDecodeException.FrameHead"/>.
+    ///
+    /// Ровно <c>_writePos - _readPos</c>, а не остаток ёмкости: за хвостом лежит
+    /// содержимое прошлых кадров, и в диагностику оно попадать не должно.
     /// </summary>
-    private string HexHead(int maxBytes)
-    {
-        int available = _writePos - _readPos;
-        int count = maxBytes < available ? maxBytes : available;
-        if (count <= 0) return string.Empty;
-
-        var sb = new StringBuilder(count * 3);
-        for (int i = 0; i < count; i++)
-        {
-            if (i > 0) sb.Append(' ');
-            sb.Append(_buffer[_readPos + i].ToString("X2"));
-        }
-        return sb.ToString();
-    }
+    private ReadOnlySpan<byte> FrameHead() => _buffer.AsSpan(_readPos, _writePos - _readPos);
 
     private void EnsureCapacity(int appendLength)
     {
