@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 namespace MinesServer.Networking.Client.Packets.GUI;
 
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly record struct BldsClickPacket() : IRootClientPacket<BldsClickPacket>
+public readonly record struct OpenBuildingsClickPacket() : IRootClientPacket<OpenBuildingsClickPacket>
 {
-    public byte PacketCode => RootClientPacketCodeProvider.Cache<BldsClickPacket>.Code;
+    public byte PacketCode => RootClientPacketCodeProvider.Cache<OpenBuildingsClickPacket>.Code;
 
     // Пустой пакет: payload нет. Явный 0 — Unsafe.SizeOf пустой структуры
     // на Mono (Unity) даёт 0, на .NET 1; wire обязан не зависеть от рантайма.
@@ -15,5 +15,5 @@ public readonly record struct BldsClickPacket() : IRootClientPacket<BldsClickPac
 
     public int Encode(Span<byte> output) => 0;
 
-    public static BldsClickPacket Decode(ReadOnlySpan<byte> input) => new();
+    public static OpenBuildingsClickPacket Decode(ReadOnlySpan<byte> input) => new();
 }
