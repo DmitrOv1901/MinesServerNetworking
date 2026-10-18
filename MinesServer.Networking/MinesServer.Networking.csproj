@@ -25,7 +25,9 @@
 
 	<ItemGroup>
 		<Compile Remove="obj\**" />
+		<Compile Remove="bin\**" />
 		<EmbeddedResource Remove="obj\**" />
+		<EmbeddedResource Remove="bin\**" />
 		<None Remove="**/*.meta" />
 		<None Remove="obj\**" />
 	</ItemGroup>

@@ -67,5 +67,7 @@ public class RootServerPacketCodeProvider : NetworkPacketCodeProvider<IRootServe
         Register<ChatMessageListPacket>();
         Register<ChatListPacket>();
         Register<MovementSpeedPacket>();
+        Register<UIWindowPacket>();
+        Register<WindowUpdatePacket>();
     }
 }

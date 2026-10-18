@@ -40,5 +40,6 @@ public class RootClientPacketCodeProvider : NetworkPacketCodeProvider<IRootClien
         Register<RuntimeAssetRequestPacket>();
         Register<DropBoxClickPacket>();
         Register<OpenBuildingsClickPacket>();
+        Register<UIEventPacket>();
     }
 }

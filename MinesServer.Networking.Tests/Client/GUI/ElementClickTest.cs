@@ -1,11 +1,11 @@
-﻿using MinesServer.Networking.Client.Packets.GUI;
+using MinesServer.Networking.Client.Packets.GUI;
 
 namespace MinesServer.Networking.Tests.Client.GUI;
 
 internal class ElementClickTest : RootClientPacketTest<ElementClickPacket>
 {
     public override ElementClickPacket Packet => new(
-        "TestWindow",
+        "Продать:%M%",
         42,
         [
             new("key1", "value1"),

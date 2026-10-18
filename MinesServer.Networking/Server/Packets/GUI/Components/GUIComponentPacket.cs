@@ -2,6 +2,7 @@
 using MinesServer.Utils;
 using System;
 using System.Linq;
+using System.Text;
 
 namespace MinesServer.Networking.Server.Packets.GUI.Components;
 
@@ -16,8 +17,8 @@ public abstract record class GUIComponentPacket : IGUIComponentPacket
     public virtual int Size =>
         sizeof(bool) // Style.HasValue
         + (Style?.Size ?? 0) // Style.Value
-        + sizeof(byte) // OnClickContext.Length
-        + OnClickContext.Length // OnClickContext
+        + sizeof(byte) // OnClickContext length prefix
+        + Encoding.UTF8.GetByteCount(OnClickContext) // OnClickContext (UTF-8)
         + sizeof(byte) // AttachedProperties.Length
         + AttachedProperties.Sum(x => x.Size); // AttachedProperties
 
@@ -27,7 +28,16 @@ public abstract record class GUIComponentPacket : IGUIComponentPacket
         writer.Write(Style is not null);
         if(Style is not null)
             writer.Write(Style.Value);
-        writer.WriteU1PrefixedASCII(OnClickContext);
+        // OnClickContext несёт action кнопок легаси-окон ("Продать:%M%", «Ордеры») —
+        // кириллица. "ASCII"-вариант режет char до младшего байта: клиент получает
+        // мусор, эхом возвращает его в ElementClickPacket.WindowTag, и серверный
+        // MButton.ProcessButton тихо не матчится. UTF-8 с байтовым префиксом
+        // побайтно совместим со старым форматом для ASCII-строк. Кодируем во
+        // временный массив: WriteU1PrefixedUtf8 требует запас (len+1)*3 байта и
+        // падает на точном буфере Size, а спановой перегрузки GetBytes нет на net481.
+        byte[] actionBytes = Encoding.UTF8.GetBytes(OnClickContext);
+        writer.Write((byte)actionBytes.Length);
+        writer.WriteArray(actionBytes);
         writer.Write((byte)AttachedProperties.Length);
         foreach (var prop in AttachedProperties)
             writer.Write(prop);
@@ -42,7 +52,7 @@ public abstract record class GUIComponentPacket : IGUIComponentPacket
             Style = GUIStylePacket.Decode(reader.Remaining);
             reader.Advance(Style.Value.Size);
         }
-        OnClickContext = reader.ReadU1PrefixedASCII(out _);
+        OnClickContext = reader.ReadU1PrefixedUtf8(out _);
         AttachedProperties = new StringPairPacket[reader.ReadU1()];
         for (int i = 0; i < AttachedProperties.Length; i++)
         {

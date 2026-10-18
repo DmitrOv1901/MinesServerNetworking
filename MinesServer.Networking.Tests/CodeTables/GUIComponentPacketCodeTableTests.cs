@@ -7,7 +7,7 @@ using MinesServer.Networking.Server.Packets.GUI.Components.Visual;
 namespace MinesServer.Networking.Tests.CodeTables;
 
 /// <summary>
-/// Снапшот таблицы кодов компонентов окон (0–12).
+/// Снапшот таблицы кодов компонентов окон (0–13).
 ///
 /// Адресует отрисовку всех серверных окон целиком, и перестановка Register не даёт
 /// исключения — окно просто рисуется не теми элементами.
@@ -32,6 +32,7 @@ internal class GUIComponentPacketCodeTableTests
             Assert.That(GUIComponentPacketCodeProvider.GetPacketCode<PanelPacket>(), Is.EqualTo((byte)10));
             Assert.That(GUIComponentPacketCodeProvider.GetPacketCode<LinePacket>(), Is.EqualTo((byte)11));
             Assert.That(GUIComponentPacketCodeProvider.GetPacketCode<CanvasPacket>(), Is.EqualTo((byte)12));
+            Assert.That(GUIComponentPacketCodeProvider.GetPacketCode<ButtonPacket>(), Is.EqualTo((byte)13));
         });
     }
 
@@ -51,8 +52,8 @@ internal class GUIComponentPacketCodeTableTests
     {
         Assert.Multiple(() =>
         {
-            Assert.That(GUIComponentPacketCodeProvider.IsValid((byte)13), Is.False);
-            Assert.That(GUIComponentPacketCodeProvider.TryGetDecoder((byte)13, out _), Is.False);
+            Assert.That(GUIComponentPacketCodeProvider.IsValid((byte)14), Is.False);
+            Assert.That(GUIComponentPacketCodeProvider.TryGetDecoder((byte)14, out _), Is.False);
         });
     }
 }

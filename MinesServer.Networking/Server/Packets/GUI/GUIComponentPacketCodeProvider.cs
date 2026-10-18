@@ -22,5 +22,6 @@ public class GUIComponentPacketCodeProvider : NetworkPacketCodeProvider<IGUIComp
         Register<PanelPacket>();
         Register<LinePacket>();
         Register<CanvasPacket>();
+        Register<ButtonPacket>();
     }
 }

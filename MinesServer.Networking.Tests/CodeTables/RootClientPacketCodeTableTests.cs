@@ -11,7 +11,7 @@ using MinesServer.Networking.Client.Packets.Utilities;
 namespace MinesServer.Networking.Tests.CodeTables;
 
 /// <summary>
-/// Снапшот таблицы кодов клиентских пакетов (0–27).
+/// Снапшот таблицы кодов клиентских пакетов (0–28).
 ///
 /// Таблица уже расходилась с серверной: клиент добавил
 /// <c>OpenProgramListClickPacket</c>, сервер о нём не знал, коды после 18
@@ -52,6 +52,7 @@ internal class RootClientPacketCodeTableTests
             Assert.That(RootClientPacketCodeProvider.GetPacketCode<RuntimeAssetRequestPacket>(), Is.EqualTo((byte)25));
             Assert.That(RootClientPacketCodeProvider.GetPacketCode<DropBoxClickPacket>(), Is.EqualTo((byte)26));
             Assert.That(RootClientPacketCodeProvider.GetPacketCode<OpenBuildingsClickPacket>(), Is.EqualTo((byte)27));
+            Assert.That(RootClientPacketCodeProvider.GetPacketCode<UIEventPacket>(), Is.EqualTo((byte)28));
         });
     }
 
@@ -75,8 +76,8 @@ internal class RootClientPacketCodeTableTests
     {
         Assert.Multiple(() =>
         {
-            Assert.That(RootClientPacketCodeProvider.IsValid((byte)28), Is.False);
-            Assert.That(RootClientPacketCodeProvider.TryGetDecoder((byte)28, out _), Is.False);
+            Assert.That(RootClientPacketCodeProvider.IsValid((byte)29), Is.False);
+            Assert.That(RootClientPacketCodeProvider.TryGetDecoder((byte)29, out _), Is.False);
         });
     }
 }
