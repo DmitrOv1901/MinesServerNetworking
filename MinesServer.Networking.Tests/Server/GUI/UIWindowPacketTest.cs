@@ -18,7 +18,6 @@ internal class UIWindowPacketTest : RootServerPacketTest<UIWindowPacket>
         new TextPacket
         {
             Text = "Привет, шахтёр!",
-            OnClickContext = "Продать:%M%",
             AttachedProperties = [new("UI.Id", "1")],
         });
 }
