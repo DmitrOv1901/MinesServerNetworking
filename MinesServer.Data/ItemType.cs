@@ -68,5 +68,8 @@ public enum ItemType : byte
     // Собственные члены сервера. Базовый тип byte (провод — 1 байт), поэтому sentinel = 255.
     NPC,
     CreditPack,
+    AutoDigger,
+    ChunkUpdater,
+    GeoStorage,
     None = 255
 }
