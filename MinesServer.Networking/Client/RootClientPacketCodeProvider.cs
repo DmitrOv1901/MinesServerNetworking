@@ -1,4 +1,4 @@
-﻿using MinesServer.Networking.Client.Packets.Actions;
+using MinesServer.Networking.Client.Packets.Actions;
 using MinesServer.Networking.Client.Packets.Chat;
 using MinesServer.Networking.Client.Packets.Connection;
 using MinesServer.Networking.Client.Packets.GUI;
@@ -40,6 +40,5 @@ public class RootClientPacketCodeProvider : NetworkPacketCodeProvider<IRootClien
         Register<RuntimeAssetRequestPacket>();
         Register<DropBoxClickPacket>();
         Register<OpenBuildingsClickPacket>();
-        Register<UIEventPacket>();
     }
 }

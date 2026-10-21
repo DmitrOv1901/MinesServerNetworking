@@ -16,7 +16,7 @@ using MinesServer.Networking.Server.Packets.World;
 namespace MinesServer.Networking.Tests.CodeTables;
 
 /// <summary>
-/// Снапшот таблицы кодов серверных пакетов (0–51).
+/// Снапшот таблицы кодов серверных пакетов (0–50).
 ///
 /// Код — позиция вызова Register, нигде не записанная явно, поэтому перестановка
 /// молча перенумеровывает протокол, и падение приходит не в тестах, а в игре.
@@ -81,8 +81,7 @@ internal class RootServerPacketCodeTableTests
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<ChatMessageListPacket>(), Is.EqualTo((ushort)47));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<ChatListPacket>(), Is.EqualTo((ushort)48));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<MovementSpeedPacket>(), Is.EqualTo((ushort)49));
-            Assert.That(RootServerPacketCodeProvider.GetPacketCode<UIWindowPacket>(), Is.EqualTo((ushort)50));
-            Assert.That(RootServerPacketCodeProvider.GetPacketCode<WindowUpdatePacket>(), Is.EqualTo((ushort)51));
+            Assert.That(RootServerPacketCodeProvider.GetPacketCode<WindowUpdatePacket>(), Is.EqualTo((ushort)50));
         });
     }
 
@@ -106,8 +105,8 @@ internal class RootServerPacketCodeTableTests
     {
         Assert.Multiple(() =>
         {
-            Assert.That(RootServerPacketCodeProvider.IsValid((ushort)52), Is.False);
-            Assert.That(RootServerPacketCodeProvider.TryGetDecoder((ushort)52, out _), Is.False);
+            Assert.That(RootServerPacketCodeProvider.IsValid((ushort)51), Is.False);
+            Assert.That(RootServerPacketCodeProvider.TryGetDecoder((ushort)51, out _), Is.False);
         });
     }
 }
