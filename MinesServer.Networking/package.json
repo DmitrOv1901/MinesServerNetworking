@@ -1,6 +1,6 @@
 {
   "name": "darkar25.kern.networking",
-  "version": "1.0.18",
+  "version": "1.0.17",
   "displayName": "Kern Network Core",
   "description": "Shared networking protocol for Client and Server",
   "unity": "6000.2",

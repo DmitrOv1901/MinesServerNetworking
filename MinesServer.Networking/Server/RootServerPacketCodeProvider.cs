@@ -1,4 +1,4 @@
-using MinesServer.Networking.Server.Packets.Chat;
+﻿using MinesServer.Networking.Server.Packets.Chat;
 using MinesServer.Networking.Server.Packets.Compression;
 using MinesServer.Networking.Server.Packets.Connection;
 using MinesServer.Networking.Server.Packets.GUI;
@@ -67,6 +67,5 @@ public class RootServerPacketCodeProvider : NetworkPacketCodeProvider<IRootServe
         Register<ChatMessageListPacket>();
         Register<ChatListPacket>();
         Register<MovementSpeedPacket>();
-        Register<WindowUpdatePacket>();
     }
 }

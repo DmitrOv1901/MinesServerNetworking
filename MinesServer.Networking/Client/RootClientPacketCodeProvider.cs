@@ -1,4 +1,4 @@
-using MinesServer.Networking.Client.Packets.Actions;
+﻿using MinesServer.Networking.Client.Packets.Actions;
 using MinesServer.Networking.Client.Packets.Chat;
 using MinesServer.Networking.Client.Packets.Connection;
 using MinesServer.Networking.Client.Packets.GUI;
