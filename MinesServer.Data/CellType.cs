@@ -88,5 +88,6 @@ public enum CellType : byte
     HypnoRock = 119,
     GoldenRock = 120,
     DeepRock = 121,
-    GRock = 122
+    GRock = 122,
+    WorldEdge = 123,
 }
