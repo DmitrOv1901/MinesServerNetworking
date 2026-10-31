@@ -5,7 +5,7 @@ using MinesServer.Networking.Client.Packets.Movement;
 namespace MinesServer.Networking.Tests.CodeTables;
 
 /// <summary>
-/// Снапшот таблицы кодов игровых действий (0–13).
+/// Снапшот таблицы кодов игровых действий (0–12).
 ///
 /// Адресует вообще все игровые действия, и перестановка Register молча отправила
 /// бы «копать» в «повернуться» — это выглядело бы как «сервер иногда не копает».
@@ -25,12 +25,11 @@ internal class ActionClientPacketCodeTableTests
             Assert.That(ActionClientPacketCodeProvider.GetPacketCode<GeoPacket>(), Is.EqualTo((byte)5));
             Assert.That(ActionClientPacketCodeProvider.GetPacketCode<HealPacket>(), Is.EqualTo((byte)6));
             Assert.That(ActionClientPacketCodeProvider.GetPacketCode<SuicidePacket>(), Is.EqualTo((byte)7));
-            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<ToggleAgressionPacket>(), Is.EqualTo((byte)8));
-            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<ToggleAutoDigPacket>(), Is.EqualTo((byte)9));
-            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<UnmappedKeyPacket>(), Is.EqualTo((byte)10));
-            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<ClickCellPacket>(), Is.EqualTo((byte)11));
-            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<MovePacket>(), Is.EqualTo((byte)12));
-            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<RotatePacket>(), Is.EqualTo((byte)13));
+            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<ToggleAutoDigPacket>(), Is.EqualTo((byte)8));
+            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<UnmappedKeyPacket>(), Is.EqualTo((byte)9));
+            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<ClickCellPacket>(), Is.EqualTo((byte)10));
+            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<MovePacket>(), Is.EqualTo((byte)11));
+            Assert.That(ActionClientPacketCodeProvider.GetPacketCode<RotatePacket>(), Is.EqualTo((byte)12));
         });
     }
 
@@ -50,8 +49,8 @@ internal class ActionClientPacketCodeTableTests
     {
         Assert.Multiple(() =>
         {
-            Assert.That(ActionClientPacketCodeProvider.IsValid((byte)14), Is.False);
-            Assert.That(ActionClientPacketCodeProvider.TryGetDecoder((byte)14, out _), Is.False);
+            Assert.That(ActionClientPacketCodeProvider.IsValid((byte)13), Is.False);
+            Assert.That(ActionClientPacketCodeProvider.TryGetDecoder((byte)13, out _), Is.False);
         });
     }
 }

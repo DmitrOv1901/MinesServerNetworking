@@ -20,7 +20,7 @@ internal class HBPacketCodeTableTests
             Assert.That(HBPacketCodeProvider.GetPacketCode<MapRegionPacket>(), Is.EqualTo((byte)0));
             Assert.That(HBPacketCodeProvider.GetPacketCode<BuildingPacket>(), Is.EqualTo((byte)1));
             Assert.That(HBPacketCodeProvider.GetPacketCode<RobotPositionPacket>(), Is.EqualTo((byte)2));
-            Assert.That(HBPacketCodeProvider.GetPacketCode<AudioPacket>(), Is.EqualTo((byte)3));
+            Assert.That(HBPacketCodeProvider.GetPacketCode<SFXPacket>(), Is.EqualTo((byte)3));
             Assert.That(HBPacketCodeProvider.GetPacketCode<VFXPacket>(), Is.EqualTo((byte)4));
             Assert.That(HBPacketCodeProvider.GetPacketCode<RemoveBuildingPacket>(), Is.EqualTo((byte)5));
         });

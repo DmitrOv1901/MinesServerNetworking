@@ -1,5 +1,4 @@
-﻿using MinesServer.Data;
-using MinesServer.Networking.Shared.Packets;
+﻿using MinesServer.Networking.Shared.Packets;
 using MinesServer.Utils;
 using System;
 using System.Collections.Generic;
@@ -7,13 +6,11 @@ using System.Linq;
 
 namespace MinesServer.Networking.Server.Packets.Information;
 
-public readonly record struct ClientConfigPacket(SoundConfigPacket SoundConfig, RendererMode Renderer, IReadOnlyList<StringPairPacket> Keybinds, IReadOnlyList<string> UnrenderedTextures) : IRootServerPacket<ClientConfigPacket>
+public readonly record struct ClientConfigPacket(IReadOnlyList<StringPairPacket> Keybinds, IReadOnlyList<string> UnrenderedTextures) : IRootServerPacket<ClientConfigPacket>
 {
     public ushort PacketCode => RootServerPacketCodeProvider.Cache<ClientConfigPacket>.Code;
 
     public int Size =>
-        SoundConfig.Size + // SoundConfig
-        sizeof(RendererMode) + // Renderer
         sizeof(byte) + // Keybinds.Length
         Keybinds.Sum(x => x.Size) + // Keybinds
         UnrenderedTextures.Sum(x => sizeof(byte) + x.Length); // UnrenderedTextures
@@ -21,8 +18,6 @@ public readonly record struct ClientConfigPacket(SoundConfigPacket SoundConfig, 
     public int Encode(Span<byte> output)
     {
         var writer = output.Writer();
-        writer.Write(SoundConfig);
-        writer.Write(Renderer);
         writer.Write((byte)Keybinds.Count);
         foreach (var keybind in Keybinds)
             writer.Write(keybind);
@@ -34,9 +29,6 @@ public readonly record struct ClientConfigPacket(SoundConfigPacket SoundConfig, 
     public static ClientConfigPacket Decode(ReadOnlySpan<byte> input)
     {
         var reader = input.Reader();
-        var sounds = SoundConfigPacket.Decode(reader.Remaining);
-        reader.Advance(sounds.Size);
-        var renderer = reader.Read<RendererMode>();
         var keybinds = new StringPairPacket[reader.ReadU1()];
         for(int i = 0; i < keybinds.Length; i++)
         {
@@ -47,11 +39,10 @@ public readonly record struct ClientConfigPacket(SoundConfigPacket SoundConfig, 
         var unrender = new List<string>();
         while (reader.CanRead)
             unrender.Add(reader.ReadU1PrefixedASCII(out _));
-        return new(sounds, renderer, keybinds, unrender);
+        return new(keybinds, unrender);
     }
 
     public bool Equals(ClientConfigPacket other) =>
-        SoundConfig == other.SoundConfig &&
-        Renderer == other.Renderer &&
+        Keybinds.SequenceEqual(other.Keybinds) &&
         UnrenderedTextures.SequenceEqual(other.UnrenderedTextures);
 }

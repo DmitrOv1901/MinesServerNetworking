@@ -1,4 +1,5 @@
-﻿using MinesServer.Networking.Server.Packets.Chat;
+﻿using System;
+using MinesServer.Networking.Server.Packets.Chat;
 using MinesServer.Networking.Server.Packets.Compression;
 using MinesServer.Networking.Server.Packets.Connection;
 using MinesServer.Networking.Server.Packets.GUI;
@@ -38,7 +39,7 @@ public class RootServerPacketCodeProvider : NetworkPacketCodeProvider<IRootServe
         Register<SelectItemPacket>();
         Register<MissionArrowPacket>();
         Register<MissionProgressPacket>();
-        Register<AggressionStatePacket>();
+        Register<ReservedRootPacket21>();
         Register<AutoMineStatePacket>();
         Register<OpenURLPacket>();
         Register<PingPacket>();
@@ -68,4 +69,19 @@ public class RootServerPacketCodeProvider : NetworkPacketCodeProvider<IRootServe
         Register<ChatListPacket>();
         Register<MovementSpeedPacket>();
     }
+}
+
+internal readonly record struct ReservedRootPacket21(byte Payload) : IRootServerPacket<ReservedRootPacket21>
+{
+    public ushort PacketCode => RootServerPacketCodeProvider.Cache<ReservedRootPacket21>.Code;
+
+    public int Size => sizeof(byte);
+
+    public int Encode(Span<byte> output)
+    {
+        output[0] = Payload;
+        return sizeof(byte);
+    }
+
+    public static ReservedRootPacket21 Decode(ReadOnlySpan<byte> input) => new(input[0]);
 }

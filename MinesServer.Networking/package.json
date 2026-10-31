@@ -1,9 +1,9 @@
 {
   "name": "darkar25.kern.networking",
   "version": "1.0.18",
-  "displayName": "Kern Network Core",
+  "displayName": "Project Kern Network Core",
   "description": "Shared networking protocol for Client and Server",
-  "unity": "6000.2",
+  "unity": "6000.7",
   "documentationUrl": "https://github.com/darkar25/MinesServerNetworking",
   "dependencies": {}
 }

@@ -1,4 +1,4 @@
-﻿using MinesServer.Networking.Client.Packets.Actions;
+using MinesServer.Networking.Client.Packets.Actions;
 using MinesServer.Networking.Client.Packets.Movement;
 
 namespace MinesServer.Networking.Client.Packets;
@@ -15,7 +15,6 @@ public class ActionClientPacketCodeProvider : NetworkPacketCodeProvider<IActionC
         Register<GeoPacket>();
         Register<HealPacket>();
         Register<SuicidePacket>();
-        Register<ToggleAgressionPacket>();
         Register<ToggleAutoDigPacket>();
         Register<UnmappedKeyPacket>();
         Register<ClickCellPacket>();

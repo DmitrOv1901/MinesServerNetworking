@@ -52,7 +52,6 @@ internal class RootServerPacketCodeTableTests
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<SelectItemPacket>(), Is.EqualTo((ushort)18));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<MissionArrowPacket>(), Is.EqualTo((ushort)19));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<MissionProgressPacket>(), Is.EqualTo((ushort)20));
-            Assert.That(RootServerPacketCodeProvider.GetPacketCode<AggressionStatePacket>(), Is.EqualTo((ushort)21));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<AutoMineStatePacket>(), Is.EqualTo((ushort)22));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<OpenURLPacket>(), Is.EqualTo((ushort)23));
             Assert.That(RootServerPacketCodeProvider.GetPacketCode<PingPacket>(), Is.EqualTo((ushort)24));

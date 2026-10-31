@@ -5,5 +5,5 @@ namespace MinesServer.Networking.Tests.Server;
 
 internal class ServerPacketTest : PacketTest<ServerPacket>
 {
-    public override ServerPacket Packet => new(new TeleportPacket(123, 456, true));
+    public override ServerPacket Packet => new(new TeleportPacket(123, 456));
 }

@@ -2,9 +2,9 @@
 
 namespace MinesServer.Networking.Tests.Server.World;
 
-internal class AudioPacketTest : PacketTest<AudioPacket>
+internal class SFXPacketTest : PacketTest<SFXPacket>
 {
-    public override AudioPacket Packet => new(
+    public override SFXPacket Packet => new(
         Data.SFX.Boom,
         303,
         50,

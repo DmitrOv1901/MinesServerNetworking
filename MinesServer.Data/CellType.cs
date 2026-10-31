@@ -1,9 +1,11 @@
 namespace MinesServer.Data;
 
+/// <summary>Тип клетки мира; например, <see cref="CellType.Empty"/> для пустой клетки или <see cref="CellType.Rock"/> для породы.</summary>
 public enum CellType : byte
 {
     Unloaded = 0,
     Pregener = 1,
+    WorldEdge = 2,
     BuildingRoad = 29,
     Gate = 30,
     VolcanoBackground = 31,
@@ -88,5 +90,5 @@ public enum CellType : byte
     HypnoRock = 119,
     GoldenRock = 120,
     DeepRock = 121,
-    GRock = 122
+    GRock = 122,
 }

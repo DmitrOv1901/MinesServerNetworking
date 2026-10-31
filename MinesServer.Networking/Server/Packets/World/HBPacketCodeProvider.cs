@@ -7,7 +7,7 @@ public class HBPacketCodeProvider : NetworkPacketCodeProvider<IHBPacket, byte, H
         Register<MapRegionPacket>();
         Register<BuildingPacket>();
         Register<RobotPositionPacket>();
-        Register<AudioPacket>();
+        Register<SFXPacket>();
         Register<VFXPacket>();
         Register<RemoveBuildingPacket>();
     }
