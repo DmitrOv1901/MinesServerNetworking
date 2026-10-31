@@ -6,22 +6,23 @@ namespace MinesServer.Networking.Tests.Server.Connection;
 internal class CellConfigurationTest : PacketTest<CellConfigurationPacket>
 {
     public override CellConfigurationPacket Packet => new(
-        Passable: true,
+        Flags: CellConfigFlags.Passable | CellConfigFlags.Breakable,
         DrawLayer: CellRenderLayer.Foreground,
         Outline: CellOutlineKind.Wavy,
-        TextureName: "Cells/Rock.png",
-        DecalTextureName: "terrain-decals-rock.png",
-        ReliefGroup: 2,
-        AnimationType: CellAnimationType.Prismatic,
-        AnimationPalette: 2,
+        TextureAnchor: CellTextureAnchorKind.Cell,
+        SurfaceEffect: CellSurfaceEffectKind.Faceted,
+        SurfaceEffectPalette: 2,
+        ShaderAnimation: CellAnimationType.Shimmer,
         FrameAnimationSpeed: 6f,
+        DecalAtlas: CellDecalAtlasKind.Rock,
+        ReliefGroup: 2,
         MapColor: unchecked((int)0xFF112233));
 
     [Test]
     public void WireLayoutMatchesProtocolContract()
     {
         var packet = Packet;
-        Assert.That(packet.Size, Is.EqualTo(16 + "Cells/Rock.png".Length + "terrain-decals-rock.png".Length));
+        Assert.That(packet.Size, Is.EqualTo(17));
         var bytes = new byte[packet.Size];
         Assert.That(packet.Encode(bytes), Is.EqualTo(packet.Size));
         Assert.That(CellConfigurationPacket.Decode(bytes), Is.EqualTo(packet));

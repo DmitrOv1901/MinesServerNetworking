@@ -1,66 +1,33 @@
 using MinesServer.Data;
 using System;
-using MinesServer.Utils;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MinesServer.Networking.Server.Packets.Connection;
 
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public readonly record struct CellConfigurationPacket(
-    bool Passable,
+    CellConfigFlags Flags,
     CellRenderLayer DrawLayer,
     CellOutlineKind Outline,
-    string TextureName,
-    string DecalTextureName,
-    byte ReliefGroup,
-    CellAnimationType AnimationType,
-    byte AnimationPalette,
+    CellTextureAnchorKind TextureAnchor,
+    CellSurfaceEffectKind SurfaceEffect,
+    byte SurfaceEffectPalette,
+    CellAnimationType ShaderAnimation,
     float FrameAnimationSpeed,
+    CellDecalAtlasKind DecalAtlas,
+    byte ReliefGroup,
     int MapColor) : IServerPacket<CellConfigurationPacket>
 {
-    private string SafeTextureName => TextureName ?? string.Empty;
-    private string SafeDecalTextureName => DecalTextureName ?? string.Empty;
+    public readonly int Size => Unsafe.SizeOf<CellConfigurationPacket>();
 
-    public int Size => sizeof(byte) * 8 + sizeof(float) + sizeof(int) + SafeTextureName.Length + SafeDecalTextureName.Length;
+    public int Encode(Span<byte> output) => output.UnsafeWrite(this);
 
-    public int Encode(Span<byte> output)
-    {
-        string textureName = SafeTextureName;
-        string decalTextureName = SafeDecalTextureName;
-        if (textureName.Length > byte.MaxValue || decalTextureName.Length > byte.MaxValue)
-        {
-            throw new InvalidOperationException("Cell and decal texture names must fit in one-byte length prefixes.");
-        }
-
-        var writer = output.Writer();
-        writer.Write((byte)(Passable ? 1 : 0));
-        writer.Write((byte)DrawLayer);
-        writer.Write((byte)Outline);
-        writer.WriteU1PrefixedASCII(textureName);
-        writer.WriteU1PrefixedASCII(decalTextureName);
-        writer.Write(ReliefGroup);
-        writer.Write((byte)AnimationType);
-        writer.Write(AnimationPalette);
-        writer.Write(FrameAnimationSpeed);
-        writer.Write(MapColor);
-        return writer.Position;
-    }
-
-    public static CellConfigurationPacket Decode(ReadOnlySpan<byte> input) => Decode(input, out _);
+    public static CellConfigurationPacket Decode(ReadOnlySpan<byte> input) => input.UnsafeRead<CellConfigurationPacket>();
 
     public static CellConfigurationPacket Decode(ReadOnlySpan<byte> input, out int bytesRead)
     {
-        var reader = input.Reader();
-        var packet = new CellConfigurationPacket(
-            Passable: reader.ReadU1() != 0,
-            DrawLayer: (CellRenderLayer)reader.ReadU1(),
-            Outline: (CellOutlineKind)reader.ReadU1(),
-            TextureName: reader.ReadU1PrefixedASCII(out _),
-            DecalTextureName: reader.ReadU1PrefixedASCII(out _),
-            ReliefGroup: reader.ReadU1(),
-            AnimationType: (CellAnimationType)reader.ReadU1(),
-            AnimationPalette: reader.ReadU1(),
-            FrameAnimationSpeed: reader.Read<float>(),
-            MapColor: reader.Read4());
-        bytesRead = reader.Position;
-        return packet;
+        bytesRead = Unsafe.SizeOf<CellConfigurationPacket>();
+        return input.UnsafeRead<CellConfigurationPacket>();
     }
 }
