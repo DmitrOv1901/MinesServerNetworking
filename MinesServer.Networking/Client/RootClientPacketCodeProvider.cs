@@ -44,5 +44,7 @@ public class RootClientPacketCodeProvider : NetworkPacketCodeProvider<IRootClien
         // последовательно, вставка в середину сдвигает коды всех последующих пакетов.
         Register<OpenChatListPacket>();
         Register<ChatMessageClickPacket>();
+        Register<OpenBonusClickPacket>();
+        Register<OpenDonateClickPacket>();
     }
 }
