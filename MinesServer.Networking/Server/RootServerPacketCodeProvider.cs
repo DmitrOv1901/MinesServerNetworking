@@ -40,7 +40,6 @@ public sealed class RootServerPacketCodeProvider : NetworkPacketCodeProvider<IRo
         Register<SelectItemPacket>();
         Register<MissionArrowPacket>();
         Register<MissionProgressPacket>();
-        Register<ReservedRootPacket21>();
         Register<AutoMineStatePacket>();
         Register<OpenURLPacket>();
         Register<PingPacket>();
@@ -70,19 +69,4 @@ public sealed class RootServerPacketCodeProvider : NetworkPacketCodeProvider<IRo
         Register<MovementSpeedPacket>();
         Register<LoadingTipPacket>();
     }
-}
-
-internal readonly record struct ReservedRootPacket21(byte Payload) : IRootServerPacket<ReservedRootPacket21>
-{
-    public ushort PacketCode => RootServerPacketCodeProvider.GetPacketCode<ReservedRootPacket21>();
-
-    public int Size => sizeof(byte);
-
-    public int Encode(Span<byte> output)
-    {
-        output[0] = Payload;
-        return sizeof(byte);
-    }
-
-    public static ReservedRootPacket21 Decode(ReadOnlySpan<byte> input) => new(input[0]);
 }
